@@ -1,0 +1,2 @@
+Cite as:
+Nick Kluft. (2019, August 26). nickkluft/3D_cluster_marker_spline: cluster_marker_spline (Version V0.1). Zenodo. http://doi.org/10.5281/zenodo.3377471
