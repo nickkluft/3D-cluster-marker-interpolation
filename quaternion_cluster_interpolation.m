@@ -1,8 +1,8 @@
-function Mout = quanternion_cluster_interpolation(Min)
-% quanternion_cluster_spline function
+function Mout = quaternion_cluster_interpolation(Min)
+% quaternion_cluster_spline function
 % Interpolation on the basis of orientiation.
 % FUNCTION
-%       Mout = quanternion_cluster_spline(Min)
+%       Mout = quaternion_cluster_spline(Min)
 % INPUT
 %       Min  = Global positional cluster marker kinematic data (n*9)
 %              (collumns should correspond to:
@@ -53,7 +53,7 @@ igap = any(isnan(Min(:,1:3:end)),2);
 igap = find(diff(igap>0));
 
 %% make extrapolation impossible:
-% when data at start of traj is missing:
+% when data at start of data is missing:
 if isnan(quat(1)) && ~isempty(igap)
     igap(1)=[];
     disp(['cannot interpolate first part data segment '])
@@ -83,7 +83,7 @@ if ~isempty(igap)
         qn = repmat(quatnormalize(quat(igap(ig+1)+1,:)),sgap+2,1);
         % Sanity check here
         if any(isnan([pn;qn]))
-            error('Nans used for interpolation (Quanterion not assigned)')
+            error('Nans used for interpolation (Quaterion not assigned)')
         end
         
         % interpolate now over the quaternion
@@ -99,7 +99,7 @@ if ~isempty(igap)
         o = find(~any(isnan(Min(igap(ig)+1:igap(ig+1),1:3:end)))); % observed marker
         
         if isempty(o)%
-%             error(['no quanternion spline possible, as none of the clust'...
+%             error(['no quaternion interpolate possible, as none of the clust'...
 %                 'er markers were visible. Consider a positional spline'...
 %                 ' first']);
         else
@@ -118,7 +118,7 @@ if ~isempty(igap)
                 = mark.(['m',num2str(im)])(igap(ig)+1:igap(ig+1),:);
             
             % check output:
-            % differences due to transforming to quanternion
+            % differences due to transforming to quaternion
 %             mark.(['m',num2str(im)])(igap(ig),:)-Min(igap(ig),[1 2 3]+3*(im-1));
 %             mark.(['m',num2str(im)])(igap(ig+1)+1,:)-Min(igap(ig+1)+1,[1 2 3]+3*(im-1))
 
