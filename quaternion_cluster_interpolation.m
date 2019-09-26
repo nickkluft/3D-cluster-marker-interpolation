@@ -1,8 +1,8 @@
 function Mout = quaternion_cluster_interpolation(Min)
-% quaternion_cluster_spline function
+% quaternion_cluster_interpolation function
 % Interpolation on the basis of orientiation.
 % FUNCTION
-%       Mout = quaternion_cluster_spline(Min)
+%       Mout = quaternion_cluster_interpolation(Min)
 % INPUT
 %       Min  = Global positional cluster marker kinematic data (n*9)
 %              (collumns should correspond to:
