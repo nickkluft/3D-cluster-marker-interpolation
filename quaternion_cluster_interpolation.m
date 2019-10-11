@@ -1,8 +1,8 @@
 function Mout = quaternion_cluster_interpolation(Min)
-% quaternion_cluster_interpolation function
+% quaternion_cluster_spline function
 % Interpolation on the basis of orientiation.
 % FUNCTION
-%       Mout = quaternion_cluster_interpolation(Min)
+%       Mout = quaternion_cluster_spline(Min)
 % INPUT
 %       Min  = Global positional cluster marker kinematic data (n*9)
 %              (collumns should correspond to:
@@ -21,10 +21,10 @@ function Mout = quaternion_cluster_interpolation(Min)
 % uses indices to easily link xxxyyyzzz to xyzxyzxyz data
 indices = transpose(reshape(1:9,3,3));
 
+% arbitrary marker assignment
 mark.m1 = Min(:,1:3);
 mark.m2 = Min(:,4:6);
 mark.m3 = Min(:,7:9);
-
 
 %% create orientation matrix
 xas= mark.m2-mark.m1;
@@ -53,15 +53,15 @@ igap = any(isnan(Min(:,1:3:end)),2);
 igap = find(diff(igap>0));
 
 %% make extrapolation impossible:
-% when data at start of data is missing:
+% when data at start of traj is missing:
 if isnan(quat(1)) && ~isempty(igap)
     igap(1)=[];
-    disp(['cannot interpolate first part data segment '])
+    disp('cannot interpolate first part data segment ')
 end
 % when data at the end of the traj is missing
 if isnan(quat(end)) && ~isempty(igap)
     igap(end)=[];
-    disp(['cannot interpolate first part data segment '])
+    disp('cannot interpolate first part data segment ')
 end
 
 %% interpolation section
@@ -83,7 +83,7 @@ if ~isempty(igap)
         qn = repmat(quatnormalize(quat(igap(ig+1)+1,:)),sgap+2,1);
         % Sanity check here
         if any(isnan([pn;qn]))
-            error('Nans used for interpolation (Quaterion not assigned)')
+            error('Nans used for interpolation (quaterion not assigned)')
         end
         
         % interpolate now over the quaternion
@@ -93,15 +93,23 @@ if ~isempty(igap)
         
         % return the rotation matrix
         Rnew = quat2rot(quat);
-        % find marker(s) missing
-        m = find(any(isnan(Min(igap(ig)+1:igap(ig+1),1:3:end)))); % missing marker
-        % find marker that is visible during traject
-        o = find(~any(isnan(Min(igap(ig)+1:igap(ig+1),1:3:end)))); % observed marker
         
-        if isempty(o)%
-%             error(['no quaternion interpolate possible, as none of the clust'...
-%                 'er markers were visible. Consider a positional spline'...
-%                 ' first']);
+        if numel(igap(ig)+1:igap(ig+1))>1
+            % find marker(s) missing
+            m = find(any(isnan(Min(igap(ig)+1:igap(ig+1),1:3:end)))); % missing marker
+            % find marker that is visible during traject
+            o = find(~any(isnan(Min(igap(ig)+1:igap(ig+1),1:3:end)))); % observed marker
+        else
+            % find marker(s) missing
+            m = find(isnan(Min(igap(ig)+1:igap(ig+1),1:3:end))); % missing marker
+            % find marker that is visible during traject
+            o = find(~isnan(Min(igap(ig)+1:igap(ig+1),1:3:end))); % observed marker
+        end
+        
+        if isempty(o)
+             disp(['no quaternion spline possible, as none of the clust'...
+                 'er markers were visible. Consider a positional spline'...
+                 ' first']);
         else
         for im = m
             % reconstruct marker positions
@@ -113,15 +121,8 @@ if ~isempty(igap)
                 prod_col(Rnew,prod_col(transpose_col(Rold(igap(ig),:)),...
                 mark.(['vec',num2str(o(2)),num2str(im)])(igap(ig),:))))/2;
             end
-            % set new marker position in bracemarkers field
             Min(igap(ig)+1:igap(ig+1),indices(im,:))...
                 = mark.(['m',num2str(im)])(igap(ig)+1:igap(ig+1),:);
-            
-            % check output:
-            % differences due to transforming to quaternion
-%             mark.(['m',num2str(im)])(igap(ig),:)-Min(igap(ig),[1 2 3]+3*(im-1));
-%             mark.(['m',num2str(im)])(igap(ig+1)+1,:)-Min(igap(ig+1)+1,[1 2 3]+3*(im-1))
-
         end
         end
     end
